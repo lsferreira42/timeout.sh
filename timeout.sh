@@ -326,10 +326,11 @@ fi
 
 # Check if we're in zsh and being sourced  
 if [ -n "${ZSH_VERSION-}" ]; then
-    # Use zsh-specific syntax more carefully
-    if [ "${ZSH_EVAL_CONTEXT-}" = "file" ] 2>/dev/null; then
-        _timeout_sourced=1
-    fi
+    # Zsh sets ZSH_EVAL_CONTEXT to values like 'toplevel:file' when a file is sourced.
+    # Consider the script sourced if the context ends with ':file'.
+    case "${ZSH_EVAL_CONTEXT-}" in
+        (*:file*) _timeout_sourced=1 ;;
+    esac
 fi
 
 # Check generic sourcing indicators

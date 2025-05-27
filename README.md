@@ -307,8 +307,8 @@ test_timeout:
 
 ### Tested Environments
 
-- **Operating Systems**: Linux, macOS, FreeBSD, OpenBSD, Solaris, AIX
-- **Shells**: sh, bash (3.2+), zsh, dash, ash, mksh
+- **Operating Systems**: Linux, macOS, FreeBSD, OpenBSD
+- **Shells**: sh, bash (3.2+), zsh, dash
 - **Architectures**: x86_64, ARM64, RISC-V
 - **Containers**: Docker, Podman, LXC
 

@@ -142,6 +142,7 @@ timeout -r 3 -i 5s -v 120 \
 | `--retry` | `-r` | Number of retry attempts | `0` |
 | `--retry-interval` | `-i` | Wait time between retries | `1s` |
 | `--verbose` | `-v` | Show retry messages and progress | off |
+| `--debug` | `-d` | Enable shell xtrace (`set -x`) and force verbose output | off |
 
 ### Exit Codes
 
@@ -359,13 +360,25 @@ echo $?  # Should be 124
 
 ### Debug Mode
 
-Enable debug output for troubleshooting:
+Enable script-level debugging which turns on shell x-trace (`set -x`) **and** automatically activates verbose output:
 
 ```bash
-# Shell debug mode
+# Enable debug with the dedicated flag
+./timeout.sh --debug 10 long-running-command
+
+# Short flag version
+./timeout.sh -d 10 long-running-command
+```
+
+This behaves the same as manually invoking the script under `sh -x`, but is more convenient and portable because it works even when the script is sourced or executed via another interpreter.
+
+Legacy techniques continue to work:
+
+```bash
+# Classic shell-level debug
 sh -x timeout.sh 10 command
 
-# Add debug to script temporarily
+# Create a temporary debug wrapper
 sed 's/#!/#!\/bin\/sh -x/' timeout.sh > debug_timeout.sh
 ```
 

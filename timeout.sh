@@ -25,6 +25,7 @@ Options:
   -r, --retry        retry command up to N times on failure (default: 0)
   -i, --retry-interval  wait time between retries (default: 1s)
   -v, --verbose      show retry messages and progress
+  -d, --debug        enable shell xtrace and force verbose output
 
 Exit codes:
   124 if COMMAND timed out
@@ -201,6 +202,7 @@ timeout_main() {
     cmd_pid=""
     timeout_pid=""
     tmp_file=""
+    debug=0
     
     # Process arguments
     while [ $# -gt 0 ]; do
@@ -248,6 +250,10 @@ timeout_main() {
             -v|--verbose)
                 verbose=1
                 ;;
+            -d|--debug)
+                debug=1
+                verbose=1  # Debug implies verbose output
+                ;;
             -*)
                 echo "Error: unknown option '$1'" >&2
                 echo "Try 'timeout --help' for more information." >&2
@@ -277,6 +283,11 @@ timeout_main() {
         echo "Error: no command specified" >&2
         echo "Try 'timeout --help' for more information." >&2
         return 125
+    fi
+    
+    # Enable shell xtrace if debug flag is set
+    if [ "$debug" -eq 1 ]; then
+        set -x
     fi
     
     # Execute command with retries

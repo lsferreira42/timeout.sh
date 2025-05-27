@@ -350,6 +350,26 @@ test_verbose_option() {
     fi
 }
 
+# Test debug option
+test_debug_option() {
+    print_header "Debug Option Tests"
+
+    # Test that debug implies verbose output
+    print_test "Debug option enables verbose retry messages and xtrace"
+    run_test
+
+    output=$($TIMEOUT_SCRIPT --debug --retry 1 1 false 2>&1)
+    exit_code=$?
+
+    # Expect verbose retry message and xtrace '+' lines
+    if echo "$output" | grep -q "Retry" && echo "$output" | grep -q "^+" && [ $exit_code -eq 1 ]; then
+        print_pass "Debug option produced verbose and xtrace output"
+    else
+        print_fail "Debug option failed"
+        echo "Debug output: $output" >&2
+    fi
+}
+
 # Test error handling
 test_error_handling() {
     print_header "Error Handling Tests"
@@ -526,6 +546,7 @@ main() {
     test_kill_after
     test_retry_functionality
     test_verbose_option
+    test_debug_option
     test_error_handling
     test_option_combinations
     test_exit_codes

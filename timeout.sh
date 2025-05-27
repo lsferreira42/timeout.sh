@@ -66,16 +66,18 @@ parse_duration() {
     fi
     
     # Convert based on suffix
-    case "$suffix" in
-        "" | "s") echo "$num" ;;
-        "m") echo $((num * 60)) ;;
-        "h") echo $((num * 3600)) ;;
-        "d") echo $((num * 86400)) ;;
-        *) 
-            echo "Error: invalid time suffix '$suffix'" >&2
-            return 1
-            ;;
-    esac
+    if [ -z "$suffix" ] || [ "$suffix" = "s" ]; then
+        echo "$num"
+    elif [ "$suffix" = "m" ]; then
+        echo $((num * 60))
+    elif [ "$suffix" = "h" ]; then
+        echo $((num * 3600))
+    elif [ "$suffix" = "d" ]; then
+        echo $((num * 86400))
+    else
+        echo "Error: invalid time suffix '$suffix'" >&2
+        return 1
+    fi
 }
 
 # Cleanup on exit
@@ -114,14 +116,14 @@ handle_signal() {
 
 # Execute single command attempt with timeout
 execute_with_timeout() {
-    local timeout_duration="$1"
-    local signal="$2"
-    local kill_after="$3"
-    local local_received_signal=0
+    timeout_duration="$1"
+    signal="$2"
+    kill_after="$3"
+    local_received_signal=0
     shift 3
     
     # Create temp file for inter-process communication
-    tmp_file=$(mktemp 2>/dev/null || echo "/tmp/timeout_$_$(date +%s)")
+    tmp_file=$(mktemp 2>/dev/null || echo "/tmp/timeout_$$_$(date +%s)")
     
     # Local signal handler
     local_handle_signal() {
@@ -189,16 +191,16 @@ execute_with_timeout() {
 # Main timeout function
 timeout_main() {
     # Default variables
-    local signal="TERM"
-    local kill_after=""
-    local timeout_duration=""
-    local retry_count=0
-    local retry_interval=1
-    local verbose=0
-    local received_signal=0
-    local cmd_pid=""
-    local timeout_pid=""
-    local tmp_file=""
+    signal="TERM"
+    kill_after=""
+    timeout_duration=""
+    retry_count=0
+    retry_interval=1
+    verbose=0
+    received_signal=0
+    cmd_pid=""
+    timeout_pid=""
+    tmp_file=""
     
     # Process arguments
     while [ $# -gt 0 ]; do
@@ -278,9 +280,9 @@ timeout_main() {
     fi
     
     # Execute command with retries
-    local attempt=0
-    local max_attempts=$((retry_count + 1))
-    local last_exit_code=1
+    attempt=0
+    max_attempts=$((retry_count + 1))
+    last_exit_code=1
     
     while [ "$attempt" -lt "$max_attempts" ]; do
         if [ "$attempt" -gt 0 ]; then
@@ -323,8 +325,11 @@ if [ -n "${BASH_VERSION-}" ] && [ "${BASH_SOURCE[0]}" != "${0}" ] 2>/dev/null; t
 fi
 
 # Check if we're in zsh and being sourced  
-if [ -n "${ZSH_VERSION-}" ] && [ "${(%):-%N}" != "${0:t}" ] 2>/dev/null; then
-    _timeout_sourced=1
+if [ -n "${ZSH_VERSION-}" ]; then
+    # Use zsh-specific syntax more carefully
+    if [ "${ZSH_EVAL_CONTEXT-}" = "file" ] 2>/dev/null; then
+        _timeout_sourced=1
+    fi
 fi
 
 # Check generic sourcing indicators
